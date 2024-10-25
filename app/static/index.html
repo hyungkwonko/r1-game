@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Segmentation</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 80%;
+      height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .upload-area,
+    .result-area {
+      flex: 1;
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .upload-area.dragover {
+      background-color: #f0f0f0;
+      border-color: #007bff;
+    }
+
+    .result-area img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div>
+      <label for="modelSelect">Choose Model Size: </label>
+      <select id="modelSelect">
+        <option value="small">Small</option>
+        <option value="medium">Medium</option>
+        <option value="large">Large</option>
+      </select>
+    </div>
+    <div id="uploadArea" class="upload-area">Drag and drop an image here, or click to select an image.
+      <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    </div>
+    <div id="originalArea" class="result-area">Uploaded image will appear here.</div>
+    <div id="statusMessage" style="display: none;">Running...</div>
+    <div id="resultArea" class="result-area">Segmented image will appear here.</div>
+  </div>
+
+  <script>
+    const uploadArea = document.getElementById("uploadArea");
+    const fileInput = document.getElementById("fileInput");
+    const originalArea = document.getElementById("originalArea");
+    const resultArea = document.getElementById("resultArea");
+    const modelSelect = document.getElementById("modelSelect");
+    const statusMessage = document.getElementById("statusMessage");
+
+    // Drag-and-drop events
+    uploadArea.addEventListener("dragover", (e) => { e.preventDefault(); uploadArea.classList.add("dragover"); });
+    uploadArea.addEventListener("dragleave", () => uploadArea.classList.remove("dragover"));
+    uploadArea.addEventListener("drop", (e) => {
+      e.preventDefault(); uploadArea.classList.remove("dragover");
+      const file = e.dataTransfer.files[0]; if (file) processImage(file);
+    });
+
+    uploadArea.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0]; if (file) processImage(file);
+    });
+
+    function processImage(file) {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("model_size", modelSelect.value);
+
+      const reader = new FileReader();
+      reader.onload = (e) => originalArea.innerHTML = `<img src="${e.target.result}" alt="Original Image">`;
+      reader.readAsDataURL(file);
+
+      statusMessage.style.display = "block"; // Show running status
+      fetch("http://localhost:5001/segment", { method: "POST", body: formData })
+        .then(response => response.blob())
+        .then(blob => {
+          statusMessage.style.display = "none"; // Hide running status
+          const url = URL.createObjectURL(blob);
+          resultArea.innerHTML = `<img src="${url}" alt="Segmented Image">`;
+        })
+        .catch(error => { console.error("Error:", error); statusMessage.style.display = "none"; });
+    }
+  </script>
+</body>
+
+</html>
