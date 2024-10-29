@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flask Web App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Side for Settings -->
+        <div class="left-panel">
+            <h3>Settings</h3>
+            <div class="setting">
+                <label for="level">Select Level:</label>
+                <select id="level">
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                </select>
+            </div>
+            <div class="setting">
+                <label>Upload Image for Segmentation:</label>
+                <!-- Drag-and-drop area -->
+                <div id="drop-zone" class="drop-zone">
+                    <p>Drag & Drop an Image Here or Click to Upload</p>
+                    <input type="file" id="upload-image" hidden>
+                </div>
+                <button onclick="uploadImage()">Segment</button>
+            </div>
+            <div class="setting">
+                <label>Segmented Result:</label>
+                <img id="segmented-image" src="" alt="Segmented Image">
+            </div>
+        </div>
+
+        <!-- Right Side for Game and Code -->
+        <div class="right-panel">
+            <div class="game-preview" id="game-preview">
+                <h3>Game Preview</h3>
+                <!-- Game preview will be displayed here -->
+            </div>
+            <div class="code-editor">
+                <h3>Game Code</h3>
+                <textarea id="code-editor" oninput="updateGamePreview()" placeholder="Write your game code here..."></textarea>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>
